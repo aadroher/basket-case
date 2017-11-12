@@ -1,12 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
-module ProjectConfig (
+module BasketCase.Config (
+  Config(),
   load,
   configFilePath
 ) where
 
   import GHC.Generics
   import qualified Data.ByteString.Char8 as BS
-  import Data.Yaml (decode, FromJSON)
+  import Data.Yaml (FromJSON, decode)
   import System.Directory (getCurrentDirectory)
 
   data Config = Config
@@ -25,10 +26,15 @@ module ProjectConfig (
     let filePath = currentDir ++ configLocalFilePath
     return filePath
 
-  load :: String -> IO ()
+  load :: String -> IO Config
   load filePath = do
     fileContents <- BS.readFile filePath
-    let parsedContents = decode fileContents :: Maybe Config
+    let parsedContents = decode fileContents :: (Maybe Config)
     case parsedContents of
-      Nothing -> error "Could not parse config file."
-      Just config -> putStrLn $ show config
+      Nothing -> do
+        let errorMessage = "Could not parse config file in " ++ filePath ++ "."
+        error errorMessage
+      Just config -> do
+        let successMessage = "Config in " ++ filePath ++ " loaded."
+        putStrLn successMessage
+        return config

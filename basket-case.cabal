@@ -5,9 +5,9 @@ version:             0.1.0.0
 homepage:            https://github.com/githubuser/basket-case#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
+author:              Armand Adroher
 maintainer:          example@example.com
-copyright:           2017 Author name here
+copyright:           2017 Armand Adroher
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     ProjectConfig
+  exposed-modules:     BasketCase.Config
   build-depends:       base >= 4.7 && < 5
                      , directory
                      , yaml

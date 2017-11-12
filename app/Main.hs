@@ -1,6 +1,6 @@
 module Main where
 
-import           ProjectConfig (configFilePath, load)
+import           BasketCase.Config (configFilePath, load)
 
 main :: IO ()
 main = do
