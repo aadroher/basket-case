@@ -1,6 +1,8 @@
 module Main where
 
-import Lib
+import           ProjectConfig (configFilePath, load)
 
 main :: IO ()
-main = someFunc
+main = do
+  filePath <- configFilePath
+  load filePath
