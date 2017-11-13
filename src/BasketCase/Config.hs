@@ -2,6 +2,7 @@
 module BasketCase.Config (
   Config(),
   load,
+  projectFolder,
   configFilePath
 ) where
 
@@ -18,7 +19,8 @@ module BasketCase.Config (
 
   instance FromJSON Config
 
-  configLocalFilePath = "/harambee_dev/config.yml"
+  projectFolder = "/harambee_dev"
+  configLocalFilePath = projectFolder ++ "/config.yml"
 
   configFilePath :: IO String
   configFilePath = do
