@@ -15,12 +15,16 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     BasketCase.BasketCase
+  exposed-modules:     BasketCase.Config
+                     , BasketCase.Team
+                     , BasketCase.Serializable
+                     , BasketCase.Account
   build-depends:       base >= 4.7 && < 5
                      , directory
                      , aeson
                      , yaml
                      , bytestring
+                     , filepath
   default-language:    Haskell2010
 
 executable basket-case-exe

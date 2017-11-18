@@ -13,6 +13,7 @@ import           GHC.Generics          (Generic ())
 
 loader :: FromJSON a => String -> String -> IO a
 loader filePath typeName = do
+  putStrLn $ "Loading file: " ++ filePath
   fileContents <- BS.readFile filePath
   let parsedContents = decode fileContents :: FromJSON a => (Maybe a)
   case parsedContents of
@@ -20,11 +21,9 @@ loader filePath typeName = do
       let errorMessage = "Could not parse " ++ typeName ++ "file in " ++ filePath ++ "."
       error errorMessage
     Just team -> do
-      let successMessage = typeName ++ " config in " ++ filePath ++ " loaded."
+      let successMessage = typeName ++ " data in " ++ filePath ++ " loaded."
       putStrLn successMessage
       return team
 
-
 class (FromJSON a, Generic a) => Serializable a where
-
   load :: String -> IO a

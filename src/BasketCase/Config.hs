@@ -1,42 +1,29 @@
 {-# LANGUAGE DeriveGeneric #-}
 module BasketCase.Config (
-  Config(),
-  load,
-  projectFolder,
-  configFilePath
+  Config (),
+  loadConfig
 ) where
 
-  import GHC.Generics
-  import qualified Data.ByteString.Char8 as BS
-  import Data.Yaml (FromJSON, decode)
-  import System.Directory (getCurrentDirectory)
+import           BasketCase.Serializable (loader)
+import           Data.Aeson.Types        (camelTo2, defaultOptions,
+                                          fieldLabelModifier, genericParseJSON)
+import           Data.Yaml               (FromJSON (), parseJSON)
+import           GHC.Generics
 
-  data Config = Config
-    { host  :: String
-    , name  :: String
-    , token :: String
-    } deriving(Show, Generic)
+data Config = Config
+  { host  :: String
+  , name  :: String
+  , token :: String
+  } deriving(Show, Generic)
 
-  instance FromJSON Config
+instance FromJSON Config where
+  parseJSON = genericParseJSON defaultOptions {
+    fieldLabelModifier = camelTo2 '_'
+  }
 
-  projectFolder = "/harambee_dev"
-  configLocalFilePath = projectFolder ++ "/config.yml"
+fileName :: String
+fileName = "config.yaml" 
 
-  configFilePath :: IO String
-  configFilePath = do
-    currentDir <- getCurrentDirectory
-    let filePath = currentDir ++ configLocalFilePath
-    return filePath
-
-  load :: String -> IO Config
-  load filePath = do
-    fileContents <- BS.readFile filePath
-    let parsedContents = decode fileContents :: (Maybe Config)
-    case parsedContents of
-      Nothing -> do
-        let errorMessage = "Could not parse config file in " ++ filePath ++ "."
-        error errorMessage
-      Just config -> do
-        let successMessage = "Config in " ++ filePath ++ " loaded."
-        putStrLn successMessage
-        return config
+loadConfig :: String -> IO Config
+loadConfig projectDirPath = loader filePath "Config"
+  where filePath = projectDirPath ++ "/" ++ fileName

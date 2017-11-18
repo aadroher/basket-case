@@ -22,3 +22,6 @@ cabal.project.local
 
 # Test input
 harambee_dev/
+
+# VS Code
+.vscode/

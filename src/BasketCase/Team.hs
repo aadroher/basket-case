@@ -1,21 +1,20 @@
 {-# LANGUAGE DeriveGeneric #-}
 module BasketCase.Team (
   Team(),
-  load
+  loadTeams
 ) where
 
-import           BasketCase.Config       (projectFolder)
-import           BasketCase.Serializable (Serializable (load), loader)
+import           BasketCase.Serializable (loader)
 import           Data.Aeson.Types        (camelTo2, defaultOptions,
                                           fieldLabelModifier, genericParseJSON)
-import qualified Data.ByteString.Char8   as BS
-import           Data.Yaml               (FromJSON (), decode, parseJSON)
+import           Data.Yaml               (FromJSON (), parseJSON)
 import           GHC.Generics
-import           System.Directory        (getCurrentDirectory)
+import           System.FilePath
+import           System.Directory
+import Control.Monad (mapM, filterM)
 
 data Team = Team
-  { id                      :: Int
-  , displayName             :: String
+  { displayName             :: String
   , excludeFromDistribution :: Bool
   , includeInDistribution   :: Bool
   , teamScreenEnabled       :: Bool
@@ -26,7 +25,30 @@ instance FromJSON Team where
     fieldLabelModifier = camelTo2 '_'
   }
 
-teamsLocalFilePath = projectFolder ++ "/teams"
+dirName :: String
+dirName = "teams"
 
-instance Serializable Team where
-  load filePath = loader filePath "Team"
+teamsDirPath :: FilePath -> FilePath
+teamsDirPath projectDirPath = projectDirPath </> dirName
+
+teamDirPath :: FilePath -> FilePath -> FilePath
+teamDirPath projectDirPath teamDirName = 
+  teamsDirPath projectDirPath </> teamDirName
+
+indexFilePath :: FilePath -> FilePath
+indexFilePath filePath = filePath </> "index.yaml" 
+
+teamDirPaths :: FilePath -> IO [FilePath]
+teamDirPaths projectDirPath = do
+  contentNames <- listDirectory $ teamsDirPath projectDirPath
+  let contentPaths = map (teamDirPath projectDirPath) contentNames
+  filterM doesDirectoryExist contentPaths
+
+loadTeam :: FilePath -> IO Team
+loadTeam filePath = loader filePath "Team"
+
+loadTeams :: FilePath -> IO [Team]
+loadTeams projectDirPath = do
+  dirPaths <- teamDirPaths projectDirPath
+  mapM loadTeam $ map indexFilePath dirPaths
+  
