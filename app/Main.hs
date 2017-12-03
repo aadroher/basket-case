@@ -10,6 +10,7 @@ import           System.Console.CmdArgs
 import           System.Directory       (getCurrentDirectory,
                                          setCurrentDirectory)
 import           System.Environment     (getArgs)
+import           Text.Pretty.Simple     (pPrint)
 
 -- import BasketCase.Team (loadTeams)
 
@@ -44,4 +45,4 @@ main :: IO ()
 main = do
   projectAbsDirPath <- getProjectDirectory
   account <- loadAccountData (fromAbsDir projectAbsDirPath)
-  print account
+  pPrint account

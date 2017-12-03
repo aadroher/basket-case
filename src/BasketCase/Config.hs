@@ -6,7 +6,7 @@ module BasketCase.Config (
   loadConfig
 ) where
 
-import           BasketCase.Serialization (loader)
+import           BasketCase.Serialization (LoadMethod (..), loader)
 import           Data.Aeson.Types         (camelTo2, defaultOptions,
                                            fieldLabelModifier, genericParseJSON)
 import           Data.Text                (Text ())
@@ -29,5 +29,5 @@ fileName :: String
 fileName = "config.yaml"
 
 loadConfig :: String -> IO Config
-loadConfig projectDirPath = loader filePath "Config"
-  where filePath = projectDirPath ++ fileName
+loadConfig projectDirPath = loader File filePath "Config"
+  where filePath = projectDirPath ++ "/" ++ fileName

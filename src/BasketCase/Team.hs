@@ -4,7 +4,7 @@ module BasketCase.Team (
   loadTeams
 ) where
 
-import           BasketCase.Serialization (loader)
+import           BasketCase.Serialization (LoadMethod (..), loader)
 import           Control.Monad            (filterM, mapM)
 import           Data.Aeson.Types         (camelTo2, defaultOptions,
                                            fieldLabelModifier, genericParseJSON)
@@ -47,7 +47,7 @@ teamDirPaths projectDirPath = do
   filterM doesDirectoryExist contentPaths
 
 loadTeam :: FilePath -> IO Team
-loadTeam filePath = loader filePath "Team"
+loadTeam filePath = loader File filePath "Team"
 
 -- Public functions
 loadTeams :: FilePath -> IO [Team]
