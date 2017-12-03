@@ -25,3 +25,6 @@ harambee_dev/
 
 # VS Code
 .vscode/
+
+# IntelliJ Junk
+.idea/

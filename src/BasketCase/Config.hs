@@ -1,19 +1,23 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module BasketCase.Config (
   Config (),
   loadConfig
 ) where
 
-import           BasketCase.Serializable (loader)
-import           Data.Aeson.Types        (camelTo2, defaultOptions,
-                                          fieldLabelModifier, genericParseJSON)
-import           Data.Yaml               (FromJSON (), parseJSON)
+import           BasketCase.Serialization (loader)
+import           Data.Aeson.Types         (camelTo2, defaultOptions,
+                                           fieldLabelModifier, genericParseJSON)
+import           Data.Text                (Text ())
+import qualified Data.Text.IO             as T
+import           Data.Yaml                (FromJSON (), parseJSON)
 import           GHC.Generics
 
 data Config = Config
-  { host  :: String
-  , name  :: String
-  , token :: String
+  { host  :: Text
+  , name  :: Text
+  , token :: Text
   } deriving(Show, Generic)
 
 instance FromJSON Config where
@@ -22,8 +26,8 @@ instance FromJSON Config where
   }
 
 fileName :: String
-fileName = "config.yaml" 
+fileName = "config.yaml"
 
 loadConfig :: String -> IO Config
 loadConfig projectDirPath = loader filePath "Config"
-  where filePath = projectDirPath ++ "/" ++ fileName
+  where filePath = projectDirPath ++ fileName
