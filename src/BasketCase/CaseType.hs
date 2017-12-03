@@ -1,25 +1,35 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module BasketCase.CaseType where
 
+import           BasketCase.Config   (Config)
+import qualified BasketCase.Reader   as R
 import           Data.Aeson
-import           Data.Aeson.Types     (camelTo2, fieldLabelModifier)
-import qualified Data.ByteString.Lazy as B
-import           Data.Text            (Text ())
--- import qualified Data.Text            as T
+import           Data.Aeson.Types    (camelTo2, fieldLabelModifier)
+import           Data.ByteString     (ByteString)
+import qualified Data.ByteString     as BS
+import           Data.Set            (Set)
+import           Data.Text           (Text ())
+import qualified Data.Yaml           as Y
 import           GHC.Generics
 import           Network.HTTP.Simple
 import           Network.URL
-import           Text.Pretty.Simple   (pPrint)
-
--- data CaseType a = Case a | Person a | Organization a
+import           Text.Pretty.Simple  (pPrint, pShow)
 
 data CaseTypeClass = Case | Person | Organization
 
+urlFragment :: CaseTypeClass -> BS.ByteString
+urlFragment ctc = case ctc of
+  Case         -> "case_types"
+  Person       -> "people_types"
+  Organization -> "organization_types"
 
 data CaseTypes = CaseTypes
-  { caseTypes :: [CaseType]
+  { caseTypes         :: Maybe (Set CaseType)
+  , peopleTypes       :: Maybe (Set CaseType)
+  , organizationTypes :: Maybe (Set CaseType)
   } deriving (Show, Generic)
 
 instance FromJSON CaseTypes where
@@ -27,33 +37,45 @@ instance FromJSON CaseTypes where
     fieldLabelModifier = camelTo2 '_'
   }
 
+urlPath :: CaseTypeClass -> ByteString
+urlPath ctc = BS.concat
+  [ "/case_blocks/"
+  , urlFragment ctc
+  , ".json"
+  ]
+
 data CaseType = CaseType
   { name                             :: Text
   , displayName                      :: Text
   , code                             :: Text
   , description                      :: Text
   , excludeContactsFromConversations :: Bool
-  } deriving (Show, Generic)
+  , schema                           :: Value
+  } deriving (Eq, Generic, ToJSON)
+
+instance Show CaseType where
+  show ct = show $ Y.encode ct
+    -- ( name ct
+    -- , displayName ct
+    -- , code ct
+    -- , Y.encode $ schema ct
+    -- )
+
+instance Ord CaseType where
+  compare a b = compare (name a) (name b)
 
 instance FromJSON CaseType where
   parseJSON = genericParseJSON defaultOptions {
     fieldLabelModifier = camelTo2 '_'
   }
 
-fetchCaseTypes :: IO ()
-fetchCaseTypes = do
-  -- request <- parseRequest "GET https://login.caseblocks.com/case_blocks/case_types.json?auth_token=dwcAYngdQDzZEU58Ym26"
-  let request = setRequestPath "/case_blocks/case_types.json"
-              $ setRequestMethod "GET"
-              $ setRequestSecure True
-              $ setRequestPort 443
-              $ setRequestHost "login.caseblocks.com"
-              $ setRequestQueryString [("auth_token", Just "dwcAYngdQDzZEU58Ym26")]
-              $ defaultRequest
+fetchCaseTypes :: Config -> CaseTypeClass -> IO CaseTypes
+fetchCaseTypes c ctc = do
+  request <- R.request c R.GET (urlPath ctc) R.JSON
   response <- httpJSON request
-  -- let responseBody = getResponseBody response
-  let parsedContents = (getResponseBody response :: CaseTypes)
-  pPrint parsedContents
+  return (getResponseBody response :: CaseTypes)
+  -- return responseBody
+  -- pPrint parsedContents
   -- case parsedContents of
   --   Nothing        -> error "Could not parse contents"
   --   Just caseTypes -> print (caseTypes :: CaseTypes)
