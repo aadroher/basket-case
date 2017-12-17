@@ -65,8 +65,13 @@ getCaseTypes ct =
           Just caseTypeSet -> caseTypeSet `union` caseTypesSet
   in foldr r empty attrs
 
-flattenCaseTypes :: [Set CaseType] -> Set CaseType
-flattenCaseTypes = foldr union empty
+-- mergeCaseTypes :: [CaseType] -> CaseTypes
+-- mergeCaseTypes caseTypeList =
+--   let attrs = [caseTypes, peopleTypes, organizationTypes]
+--       r attr caseTypes =
+--         case attr caseTypes of
+--           Nothing          -> caseTypes
+--           Just caseTypeSet -> caseTypes { attr = (attr caseTypes) `union` caseTypesSet }
 
 fetchClassCaseTypes :: Config -> CaseTypeClass -> IO CaseTypes
 fetchClassCaseTypes c ctc = do
@@ -74,10 +79,9 @@ fetchClassCaseTypes c ctc = do
   response <- httpJSON request
   return (getResponseBody response :: CaseTypes)
 
-fetchCaseTypes :: Config -> IO (Set CaseType)
+fetchCaseTypes :: Config -> IO CaseTypes
 fetchCaseTypes c = do
   ct <- fetchClassCaseTypes c Case
   pt <- fetchClassCaseTypes c Person
   ot <- fetchClassCaseTypes c Organization
-  let caseTypesSetList = map getCaseTypes [ct, pt, ot]
-  return $ flattenCaseTypes caseTypesSetList
+  return $ mergeCaseTypes [ct, pt, ot]
