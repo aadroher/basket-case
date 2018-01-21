@@ -1,13 +1,20 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module BasketCase.Config (
-  Config (),
-  loadConfig
+  Config (..),
+  loadConfig,
+  authToken
 ) where
 
-import           BasketCase.Serializable (loader)
-import           Data.Aeson.Types        (camelTo2, defaultOptions,
-                                          fieldLabelModifier, genericParseJSON)
-import           Data.Yaml               (FromJSON (), parseJSON)
+import           BasketCase.Serialization (LoadMethod (..), loader)
+import           Data.Aeson.Types         (camelTo2, defaultOptions,
+                                           fieldLabelModifier, genericParseJSON)
+import           Data.ByteString          (ByteString)
+import           Data.ByteString.Char8    (pack)
+import           Data.Text                (Text ())
+import qualified Data.Text.IO             as T
+import           Data.Yaml                (FromJSON (), parseJSON)
 import           GHC.Generics
 
 data Config = Config
@@ -22,8 +29,11 @@ instance FromJSON Config where
   }
 
 fileName :: String
-fileName = "config.yaml" 
+fileName = "config.yaml"
+
+authToken :: Config -> ByteString
+authToken = pack . token
 
 loadConfig :: String -> IO Config
-loadConfig projectDirPath = loader filePath "Config"
+loadConfig projectDirPath = loader File filePath "Config"
   where filePath = projectDirPath ++ "/" ++ fileName

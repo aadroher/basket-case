@@ -21,7 +21,10 @@ cabal.project.local
 .HTF/
 
 # Test input
-harambee_dev/
+data/
 
 # VS Code
 .vscode/
+
+# IntelliJ Junk
+.idea/
